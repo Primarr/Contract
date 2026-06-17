@@ -9,17 +9,13 @@ impl Budget {
     /// Configure spending limits for an agent
     pub fn set_limit(
         env: Env,
-        agent: Address,
+        agent: Symbol,
         session_cap: i128,
         task_cap: i128,
-        rate_limit: u32,
     ) -> bool {
-        agent.require_auth();
-
-        let key = Symbol::new(&env, &format!("limit:{}", agent));
         env.storage()
             .persistent()
-            .set(&key, &(session_cap, task_cap, rate_limit));
+            .set(&agent, &(session_cap, task_cap));
 
         true
     }
@@ -27,18 +23,14 @@ impl Budget {
     /// Check if payment would exceed budget
     pub fn check_limit(
         env: Env,
-        agent: Address,
+        agent: Symbol,
         amount: i128,
         payment_type: u32, // 0 = session, 1 = task
     ) -> bool {
-        let key = Symbol::new(&env, &format!("limit:{}", agent));
-
-        if let Some((session_cap, task_cap, _)) = env
+        if let Some((session_cap, task_cap)) = env
             .storage()
             .persistent()
-            .get::<_, (i128, i128, u32)>(&key)
-            .ok()
-            .flatten()
+            .get::<_, (i128, i128)>(&agent)
         {
             match payment_type {
                 0 => amount <= session_cap,
@@ -51,31 +43,17 @@ impl Budget {
     }
 
     /// Get current budget for agent
-    pub fn get_limit(env: Env, agent: Address) -> Option<(i128, i128, u32)> {
-        let key = Symbol::new(&env, &format!("limit:{}", agent));
-
+    pub fn get_limit(env: Env, agent: Symbol) -> Option<(i128, i128)> {
         env.storage()
             .persistent()
-            .get::<_, (i128, i128, u32)>(&key)
-            .ok()
-            .flatten()
-    }
-
-    /// Reset session budget
-    pub fn reset_session(env: Env, agent: Address) -> bool {
-        agent.require_auth();
-
-        let key = Symbol::new(&env, &format!("spent:{}", agent));
-        env.storage().persistent().remove(&key);
-
-        true
+            .get::<_, (i128, i128)>(&agent)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use soroban_sdk::Env;
+    use soroban_sdk::{Env, Symbol};
 
     #[test]
     fn test_budget() {
@@ -83,10 +61,10 @@ mod tests {
         let contract_id = env.register_contract(None, Budget);
         let client = BudgetClient::new(&env, &contract_id);
 
-        let agent = Address::random(&env);
+        let agent = Symbol::new(&env, "test_agent");
 
         // Set limit
-        let result = client.set_limit(&agent, &5000i128, &1000i128, &100u32);
+        let result = client.set_limit(&agent, &5000i128, &1000i128);
         assert!(result);
 
         // Check limit

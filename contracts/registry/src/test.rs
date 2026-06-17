@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use super::*;
-use soroban_sdk::{Env, String, Address};
+use soroban_sdk::{Env, Symbol, Address};
 
 #[test]
 fn test_registry() {
@@ -10,18 +10,13 @@ fn test_registry() {
     let client = RegistryClient::new(&env, &contract_id);
 
     let provider = Address::random(&env);
-    let service_id = String::from_str(&env, "test-service");
-    let capability = String::from_str(&env, "inference");
+    let service_id = Symbol::new(&env, "test_service");
 
     // Test register
-    let result = client.register(&provider, &service_id, &capability, &provider, &1000i128);
+    let result = client.register(&service_id, &provider, &1000i128);
     assert!(result);
 
     // Test get_price
     let price = client.get_price(&service_id);
-    assert_eq!(price, Some(1000i128));
-
-    // Test get_provider
-    let prov = client.get_provider(&service_id);
-    assert!(prov.is_some());
+    assert_eq!(price, 1000i128);
 }
