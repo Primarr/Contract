@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Env, Symbol, Address};
+use soroban_sdk::{contract, contractimpl, Address, Env, Symbol};
 
 #[contract]
 pub struct Registry;
@@ -7,12 +7,7 @@ pub struct Registry;
 #[contractimpl]
 impl Registry {
     /// Register a new service in the registry
-    pub fn register(
-        env: Env,
-        service_id: Symbol,
-        provider: Address,
-        price_per_call: i128,
-    ) -> bool {
+    pub fn register(env: Env, service_id: Symbol, provider: Address, price_per_call: i128) -> bool {
         provider.require_auth();
 
         if env.storage().persistent().has(&service_id) {

@@ -7,12 +7,7 @@ pub struct Budget;
 #[contractimpl]
 impl Budget {
     /// Configure spending limits for an agent
-    pub fn set_limit(
-        env: Env,
-        agent: Symbol,
-        session_cap: i128,
-        task_cap: i128,
-    ) -> bool {
+    pub fn set_limit(env: Env, agent: Symbol, session_cap: i128, task_cap: i128) -> bool {
         env.storage()
             .persistent()
             .set(&agent, &(session_cap, task_cap));
@@ -27,10 +22,8 @@ impl Budget {
         amount: i128,
         payment_type: u32, // 0 = session, 1 = task
     ) -> bool {
-        if let Some((session_cap, task_cap)) = env
-            .storage()
-            .persistent()
-            .get::<_, (i128, i128)>(&agent)
+        if let Some((session_cap, task_cap)) =
+            env.storage().persistent().get::<_, (i128, i128)>(&agent)
         {
             match payment_type {
                 0 => amount <= session_cap,
@@ -44,9 +37,7 @@ impl Budget {
 
     /// Get current budget for agent
     pub fn get_limit(env: Env, agent: Symbol) -> Option<(i128, i128)> {
-        env.storage()
-            .persistent()
-            .get::<_, (i128, i128)>(&agent)
+        env.storage().persistent().get::<_, (i128, i128)>(&agent)
     }
 }
 

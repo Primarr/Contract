@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Env, Address, Symbol};
+use soroban_sdk::{contract, contractimpl, Address, Env, Symbol};
 
 #[contract]
 pub struct Settlement;
@@ -52,5 +52,4 @@ mod tests {
         let fee = Settlement::compute_fee(1000i128, 20i128);
         assert_eq!(fee, 2i128);
     }
-
 }
