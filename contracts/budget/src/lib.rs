@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Env, Address, Symbol};
+use soroban_sdk::{contract, contractimpl, Env, Symbol};
 
 #[contract]
 pub struct Budget;
@@ -58,7 +58,7 @@ mod tests {
     #[test]
     fn test_budget() {
         let env = Env::default();
-        let contract_id = env.register_contract(None, Budget);
+        let contract_id = env.register(Budget, ());
         let client = BudgetClient::new(&env, &contract_id);
 
         let agent = Symbol::new(&env, "test_agent");

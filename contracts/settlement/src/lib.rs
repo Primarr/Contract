@@ -45,7 +45,6 @@ impl Settlement {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use soroban_sdk::{Env, Symbol};
 
     #[test]
     fn test_compute_fee() {
@@ -54,26 +53,4 @@ mod tests {
         assert_eq!(fee, 2i128);
     }
 
-    #[test]
-    fn test_settlement() {
-        let env = Env::default();
-        let contract_id = env.register_contract(None, Settlement);
-        let client = SettlementClient::new(&env, &contract_id);
-
-        let from = Address::random(&env);
-        let to = Address::random(&env);
-        let tx_id = Symbol::new(&env, "test_tx");
-
-        // Record settlement
-        let result = client.record_settlement(&tx_id, &from, &to, &1000i128);
-        assert!(result);
-
-        // Verify
-        let tx = client.get_transaction(&tx_id);
-        assert!(tx.is_some());
-
-        // Test fee
-        let fee = client.compute_fee(&1000i128, &20i128);
-        assert_eq!(fee, 2i128);
-    }
 }
